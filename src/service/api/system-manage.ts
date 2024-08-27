@@ -1,4 +1,4 @@
-import {request} from '../request';
+import { request } from '../request';
 
 /** get role list */
 export function fetchGetRoleList(params?: Api.SystemManage.RoleSearchParams) {
@@ -123,8 +123,6 @@ export function fetchBatchRemoveRole(ids: string[]) {
     data: ids
   });
 }
-
-
 
 /** update menu tree */
 export function fetchEditUser(data: any) {

@@ -11,6 +11,7 @@ interface Props {
   roleId: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<Props>();
 
 const visible = defineModel<boolean>('visible', {
@@ -50,13 +51,11 @@ async function getAllButtons() {
 const checks = shallowRef<number[]>([]);
 
 async function getChecks() {
-  console.log(props.roleId);
   // request
   checks.value = [1, 2, 3, 4, 5];
 }
 
 function handleSubmit() {
-  console.log(checks.value, props.roleId);
   // request
 
   window.$message?.success?.($t('common.modifySuccess'));

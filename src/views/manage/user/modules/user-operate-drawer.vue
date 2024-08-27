@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
-import {fetchAddRole, fetchEditRole, fetchGetAllRoles} from '@/service/api';
+import { fetchGetAllRoles } from '@/service/api';
 import { $t } from '@/locales';
-import { fetchAddUser, fetchEditUser } from "@/service/api/system-manage";
+import { fetchAddUser, fetchEditUser } from '@/service/api/system-manage';
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
 
 defineOptions({
