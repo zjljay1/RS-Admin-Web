@@ -34,7 +34,8 @@ async function getHome() {
 
 async function updateHome(val: string) {
   // request
-
+  console.log("更新数据：",val);
+  // const {error} = await fetchEditRole(val);
   home.value = val;
 }
 

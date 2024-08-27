@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
-import { useBoolean } from '@sa/hooks';
-import { useFormRules, useNaiveForm } from '@/hooks/common/form';
-import { $t } from '@/locales';
-import { enableStatusOptions } from '@/constants/business';
+import {computed, reactive, watch} from 'vue';
+import {useBoolean} from '@sa/hooks';
+import {useFormRules, useNaiveForm} from '@/hooks/common/form';
+import {$t} from '@/locales';
+import {enableStatusOptions} from '@/constants/business';
+import { fetchAddRole, fetchEditRole } from "@/service/api/system-manage"
 import MenuAuthModal from './menu-auth-modal.vue';
 import ButtonAuthModal from './button-auth-modal.vue';
 
@@ -30,10 +31,10 @@ const visible = defineModel<boolean>('visible', {
   default: false
 });
 
-const { formRef, validate, restoreValidation } = useNaiveForm();
-const { defaultRequiredRule } = useFormRules();
-const { bool: menuAuthVisible, setTrue: openMenuAuthModal } = useBoolean();
-const { bool: buttonAuthVisible, setTrue: openButtonAuthModal } = useBoolean();
+const {formRef, validate, restoreValidation} = useNaiveForm();
+const {defaultRequiredRule} = useFormRules();
+const {bool: menuAuthVisible, setTrue: openMenuAuthModal} = useBoolean();
+const {bool: buttonAuthVisible, setTrue: openButtonAuthModal} = useBoolean();
 
 const title = computed(() => {
   const titles: Record<NaiveUI.TableOperateType, string> = {
@@ -82,7 +83,17 @@ function closeDrawer() {
 
 async function handleSubmit() {
   await validate();
+  let response;
   // request
+  if (props.operateType === 'add') {
+    response = await fetchAddRole(model);
+  } else {
+    response = await fetchEditRole(model);
+  }
+  if (response.error) {
+    window.$message?.error($t('common.error'));
+    return;
+  }
   window.$message?.success($t('common.updateSuccess'));
   closeDrawer();
   emit('submitted');
@@ -101,25 +112,25 @@ watch(visible, () => {
     <NDrawerContent :title="title" :native-scrollbar="false" closable>
       <NForm ref="formRef" :model="model" :rules="rules">
         <NFormItem :label="$t('page.manage.role.roleName')" path="roleName">
-          <NInput v-model:value="model.roleName" :placeholder="$t('page.manage.role.form.roleName')" />
+          <NInput v-model:value="model.roleName" :placeholder="$t('page.manage.role.form.roleName')"/>
         </NFormItem>
         <NFormItem :label="$t('page.manage.role.roleCode')" path="roleCode">
-          <NInput v-model:value="model.roleCode" :placeholder="$t('page.manage.role.form.roleCode')" />
+          <NInput v-model:value="model.roleCode" :placeholder="$t('page.manage.role.form.roleCode')"/>
         </NFormItem>
         <NFormItem :label="$t('page.manage.role.roleStatus')" path="status">
           <NRadioGroup v-model:value="model.status">
-            <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
+            <NRadio v-for="item in enableStatusOptions" :key="item.value" :value="item.value" :label="$t(item.label)"/>
           </NRadioGroup>
         </NFormItem>
         <NFormItem :label="$t('page.manage.role.roleDesc')" path="roleDesc">
-          <NInput v-model:value="model.roleDesc" :placeholder="$t('page.manage.role.form.roleDesc')" />
+          <NInput v-model:value="model.roleDesc" :placeholder="$t('page.manage.role.form.roleDesc')"/>
         </NFormItem>
       </NForm>
       <NSpace v-if="isEdit">
         <NButton @click="openMenuAuthModal">{{ $t('page.manage.role.menuAuth') }}</NButton>
-        <MenuAuthModal v-model:visible="menuAuthVisible" :role-id="roleId" />
+        <MenuAuthModal v-model:visible="menuAuthVisible" :role-id="roleId"/>
         <NButton @click="openButtonAuthModal">{{ $t('page.manage.role.buttonAuth') }}</NButton>
-        <ButtonAuthModal v-model:visible="buttonAuthVisible" :role-id="roleId" />
+        <ButtonAuthModal v-model:visible="buttonAuthVisible" :role-id="roleId"/>
       </NSpace>
       <template #footer>
         <NSpace :size="16">

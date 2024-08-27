@@ -10,6 +10,7 @@ import { $t } from '@/locales';
 import { yesOrNoRecord } from '@/constants/common';
 import { enableStatusRecord, menuTypeRecord } from '@/constants/business';
 import SvgIcon from '@/components/custom/svg-icon.vue';
+import { fetchBatchRemoveMenuTree, fetchRemoveMenuTree } from '@/service/api/system-manage';
 import MenuOperateModal, { type OperateType } from './modules/menu-operate-modal.vue';
 
 const appStore = useAppStore();
@@ -56,7 +57,6 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
         const { i18nKey, menuName } = row;
 
         const label = i18nKey ? $t(i18nKey) : menuName;
-
         return <span>{label}</span>;
       }
     },
@@ -182,15 +182,19 @@ function handleAdd() {
 async function handleBatchDelete() {
   // request
   console.log(checkedRowKeys.value);
-
-  onBatchDeleted();
+  const { error } = await fetchBatchRemoveMenuTree(checkedRowKeys.value);
+  if (!error) {
+    await onBatchDeleted();
+  }
 }
 
-function handleDelete(id: number) {
+async function handleDelete(id: number) {
   // request
   console.log(id);
-
-  onDeleted();
+  const { error } = await fetchRemoveMenuTree(id);
+  if (!error) {
+    await onDeleted();
+  }
 }
 
 /** the edit menu data or the parent menu data when adding a child menu */
@@ -199,7 +203,6 @@ const editingData: Ref<Api.SystemManage.Menu | null> = ref(null);
 function handleEdit(item: Api.SystemManage.Menu) {
   operateType.value = 'edit';
   editingData.value = { ...item };
-
   openModal();
 }
 

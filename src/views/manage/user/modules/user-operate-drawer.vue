@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
-import { fetchGetAllRoles } from '@/service/api';
+import {fetchAddRole, fetchEditRole, fetchGetAllRoles} from '@/service/api';
 import { $t } from '@/locales';
+import { fetchAddUser, fetchEditUser } from "@/service/api/system-manage";
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
 
 defineOptions({
@@ -103,7 +104,17 @@ function closeDrawer() {
 
 async function handleSubmit() {
   await validate();
+  let response;
   // request
+  if (props.operateType === 'add') {
+    response = await fetchAddUser(model);
+  } else {
+    response = await fetchEditUser(model);
+  }
+  if (response.error) {
+    window.$message?.error($t('common.error'));
+    return;
+  }
   window.$message?.success($t('common.updateSuccess'));
   closeDrawer();
   emit('submitted');

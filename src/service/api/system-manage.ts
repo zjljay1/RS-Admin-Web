@@ -1,4 +1,4 @@
-import { request } from '../request';
+import {request} from '../request';
 
 /** get role list */
 export function fetchGetRoleList(params?: Api.SystemManage.RoleSearchParams) {
@@ -51,5 +51,112 @@ export function fetchGetMenuTree() {
   return request<Api.SystemManage.MenuTree[]>({
     url: '/systemManage/getMenuTree',
     method: 'get'
+  });
+}
+
+/** update menu tree */
+export function fetchEditMenuTree(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/editMenu',
+    method: 'put',
+    data
+  });
+}
+
+/** add menu tree */
+export function fetchAddMenuTree(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/addMenu',
+    method: 'post',
+    data
+  });
+}
+
+/** remove menu trees */
+export function fetchBatchRemoveMenuTree(ids: string[]) {
+  return request<Boolean>({
+    url: `/systemManage/batchRemoveMenu`,
+    method: 'delete',
+    data: ids
+  });
+}
+
+/** remove menu tree */
+export function fetchRemoveMenuTree(id: number) {
+  return request<Boolean>({
+    url: `/systemManage/removeMenu/${id}`,
+    method: 'delete'
+  });
+}
+
+/** update menu tree */
+export function fetchEditRole(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/editRole',
+    method: 'put',
+    data
+  });
+}
+
+/** add menu tree */
+export function fetchAddRole(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/addRole',
+    method: 'post',
+    data
+  });
+}
+
+/** remove menu tree */
+export function fetchRemoveRole(id: number) {
+  return request<Boolean>({
+    url: `/systemManage/removeRole/${id}`,
+    method: 'delete'
+  });
+}
+
+/** remove menu trees */
+export function fetchBatchRemoveRole(ids: string[]) {
+  return request<Boolean>({
+    url: `/systemManage/batchRemoveRole`,
+    method: 'delete',
+    data: ids
+  });
+}
+
+
+
+/** update menu tree */
+export function fetchEditUser(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/updateUser',
+    method: 'put',
+    data
+  });
+}
+
+/** add menu tree */
+export function fetchAddUser(data: any) {
+  return request<Boolean>({
+    url: '/systemManage/createUser',
+    method: 'post',
+    data
+  });
+}
+
+/** remove menu tree */
+export function fetchRemoveUser(id: number) {
+  return request<Boolean>({
+    url: `/systemManage/removeRole/${id}`,
+    method: 'delete'
+  });
+}
+
+/** remove menu trees */
+export function fetchBatchRemoveUser(ids: string[]) {
+  return request<Boolean>({
+    url: `/systemManage/deleteUser`,
+    method: 'delete',
+    data: ids
   });
 }

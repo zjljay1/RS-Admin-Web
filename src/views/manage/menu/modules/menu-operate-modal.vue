@@ -1,12 +1,12 @@
 <script setup lang="tsx">
-import { computed, reactive, ref, watch } from 'vue';
-import type { SelectOption } from 'naive-ui';
-import { useFormRules, useNaiveForm } from '@/hooks/common/form';
-import { $t } from '@/locales';
-import { enableStatusOptions, menuIconTypeOptions, menuTypeOptions } from '@/constants/business';
+import {computed, reactive, ref, watch} from 'vue';
+import type {SelectOption} from 'naive-ui';
+import {useFormRules, useNaiveForm} from '@/hooks/common/form';
+import {$t} from '@/locales';
+import {enableStatusOptions, menuIconTypeOptions, menuTypeOptions} from '@/constants/business';
 import SvgIcon from '@/components/custom/svg-icon.vue';
-import { getLocalIcons } from '@/utils/icon';
-import { fetchGetAllRoles } from '@/service/api';
+import {getLocalIcons} from '@/utils/icon';
+import {fetchGetAllRoles} from '@/service/api';
 import {
   getLayoutAndPage,
   getPathParamFromRoutePath,
@@ -14,6 +14,8 @@ import {
   getRoutePathWithParam,
   transformLayoutAndPageToComponent
 } from './shared';
+import {fetchAddMenuTree, fetchEditMenuTree} from "@/service/api/system-manage"
+
 
 defineOptions({
   name: 'MenuOperateModal'
@@ -42,8 +44,8 @@ const visible = defineModel<boolean>('visible', {
   default: false
 });
 
-const { formRef, validate, restoreValidation } = useNaiveForm();
-const { defaultRequiredRule } = useFormRules();
+const {formRef, validate, restoreValidation} = useNaiveForm();
+const {defaultRequiredRule} = useFormRules();
 
 const title = computed(() => {
   const titles: Record<OperateType, string> = {
@@ -127,7 +129,7 @@ const localIcons = getLocalIcons();
 const localIconOptions = localIcons.map<SelectOption>(item => ({
   label: () => (
     <div class="flex-y-center gap-16px">
-      <SvgIcon localIcon={item} class="text-icon" />
+      <SvgIcon localIcon={item} class="text-icon"/>
       <span>{item}</span>
     </div>
   ),
@@ -168,7 +170,7 @@ const layoutOptions: CommonType.Option[] = [
 const roleOptions = ref<CommonType.Option<string>[]>([]);
 
 async function getRoleOptions() {
-  const { error, data } = await fetchGetAllRoles();
+  const {error, data} = await fetchGetAllRoles();
 
   if (!error) {
     const options = data.map(item => ({
@@ -186,18 +188,18 @@ function handleInitModel() {
   if (!props.rowData) return;
 
   if (props.operateType === 'addChild') {
-    const { id } = props.rowData;
+    const {id} = props.rowData;
 
-    Object.assign(model, { parentId: id });
+    Object.assign(model, {parentId: id});
   }
 
   if (props.operateType === 'edit') {
-    const { component, ...rest } = props.rowData;
+    const {component, ...rest} = props.rowData;
 
-    const { layout, page } = getLayoutAndPage(component);
-    const { path, param } = getPathParamFromRoutePath(rest.routePath);
+    const {layout, page} = getLayoutAndPage(component);
+    const {path, param} = getPathParamFromRoutePath(rest.routePath);
 
-    Object.assign(model, rest, { layout, page, routePath: path, pathParam: param });
+    Object.assign(model, rest, {layout, page, routePath: path, pathParam: param});
   }
 
   if (!model.query) {
@@ -238,7 +240,7 @@ function handleCreateButton() {
 }
 
 function getSubmitParams() {
-  const { layout, page, pathParam, ...params } = model;
+  const {layout, page, pathParam, ...params} = model;
 
   const component = transformLayoutAndPageToComponent(layout, page);
   const routePath = getRoutePathWithParam(model.routePath, pathParam);
@@ -250,16 +252,36 @@ function getSubmitParams() {
 }
 
 async function handleSubmit() {
-  await validate();
+  try {
+    // Validate form
+    await validate();
+    // Prepare submission parameters
+    const params = getSubmitParams();
+    console.log("params:", params);
+    // Depending on the operation type, call the appropriate API
+    let response;
+    if (props.operateType === 'add' || props.operateType === 'addChild') {
+      response = await fetchAddMenuTree(params);
+    } else {
+      response = await fetchEditMenuTree(params);
+    }
 
-  const params = getSubmitParams();
+    // Check the response and handle errors
+    if (response.error) {
+      window.$message?.error($t('common.error'));
+      return;
+    }
 
-  console.log('params: ', params);
+    // Success feedback
+    window.$message?.success($t('common.updateSuccess'));
 
-  // request
-  window.$message?.success($t('common.updateSuccess'));
-  closeDrawer();
-  emit('submitted');
+    // Close the modal and emit the submit event
+    closeDrawer();
+    emit('submitted');
+  } catch (error) {
+    // Catch any validation or API errors
+    window.$message?.error($t('common.error'));
+  }
 }
 
 watch(visible, () => {
@@ -286,20 +308,20 @@ watch(
         <NGrid responsive="screen" item-responsive>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.menuType')" path="menuType">
             <NRadioGroup v-model:value="model.menuType" :disabled="disabledMenuType">
-              <NRadio v-for="item in menuTypeOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
+              <NRadio v-for="item in menuTypeOptions" :key="item.value" :value="item.value" :label="$t(item.label)"/>
             </NRadioGroup>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.menuName')" path="menuName">
-            <NInput v-model:value="model.menuName" :placeholder="$t('page.manage.menu.form.menuName')" />
+            <NInput v-model:value="model.menuName" :placeholder="$t('page.manage.menu.form.menuName')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.routeName')" path="routeName">
-            <NInput v-model:value="model.routeName" :placeholder="$t('page.manage.menu.form.routeName')" />
+            <NInput v-model:value="model.routeName" :placeholder="$t('page.manage.menu.form.routeName')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.routePath')" path="routePath">
-            <NInput v-model:value="model.routePath" disabled :placeholder="$t('page.manage.menu.form.routePath')" />
+            <NInput v-model:value="model.routePath" disabled :placeholder="$t('page.manage.menu.form.routePath')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.pathParam')" path="pathParam">
-            <NInput v-model:value="model.pathParam" :placeholder="$t('page.manage.menu.form.pathParam')" />
+            <NInput v-model:value="model.pathParam" :placeholder="$t('page.manage.menu.form.pathParam')"/>
           </NFormItemGi>
           <NFormItemGi v-if="showLayout" span="24 m:12" :label="$t('page.manage.menu.layout')" path="layout">
             <NSelect
@@ -316,10 +338,10 @@ watch(
             />
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.i18nKey')" path="i18nKey">
-            <NInput v-model:value="model.i18nKey" :placeholder="$t('page.manage.menu.form.i18nKey')" />
+            <NInput v-model:value="model.i18nKey" :placeholder="$t('page.manage.menu.form.i18nKey')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.order')" path="order">
-            <NInputNumber v-model:value="model.order" class="w-full" :placeholder="$t('page.manage.menu.form.order')" />
+            <NInputNumber v-model:value="model.order" class="w-full" :placeholder="$t('page.manage.menu.form.order')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.iconTypeTitle')" path="iconType">
             <NRadioGroup v-model:value="model.iconType">
@@ -335,7 +357,7 @@ watch(
             <template v-if="model.iconType === '1'">
               <NInput v-model:value="model.icon" :placeholder="$t('page.manage.menu.form.icon')" class="flex-1">
                 <template #suffix>
-                  <SvgIcon v-if="model.icon" :icon="model.icon" class="text-icon" />
+                  <SvgIcon v-if="model.icon" :icon="model.icon" class="text-icon"/>
                 </template>
               </NInput>
             </template>
@@ -359,23 +381,23 @@ watch(
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.keepAlive')" path="keepAlive">
             <NRadioGroup v-model:value="model.keepAlive">
-              <NRadio :value="true" :label="$t('common.yesOrNo.yes')" />
-              <NRadio :value="false" :label="$t('common.yesOrNo.no')" />
+              <NRadio :value="true" :label="$t('common.yesOrNo.yes')"/>
+              <NRadio :value="false" :label="$t('common.yesOrNo.no')"/>
             </NRadioGroup>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.constant')" path="constant">
             <NRadioGroup v-model:value="model.constant">
-              <NRadio :value="true" :label="$t('common.yesOrNo.yes')" />
-              <NRadio :value="false" :label="$t('common.yesOrNo.no')" />
+              <NRadio :value="true" :label="$t('common.yesOrNo.yes')"/>
+              <NRadio :value="false" :label="$t('common.yesOrNo.no')"/>
             </NRadioGroup>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.href')" path="href">
-            <NInput v-model:value="model.href" :placeholder="$t('page.manage.menu.form.href')" />
+            <NInput v-model:value="model.href" :placeholder="$t('page.manage.menu.form.href')"/>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.hideInMenu')" path="hideInMenu">
             <NRadioGroup v-model:value="model.hideInMenu">
-              <NRadio :value="true" :label="$t('common.yesOrNo.yes')" />
-              <NRadio :value="false" :label="$t('common.yesOrNo.no')" />
+              <NRadio :value="true" :label="$t('common.yesOrNo.yes')"/>
+              <NRadio :value="false" :label="$t('common.yesOrNo.no')"/>
             </NRadioGroup>
           </NFormItemGi>
           <NFormItemGi
@@ -393,8 +415,8 @@ watch(
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.multiTab')" path="multiTab">
             <NRadioGroup v-model:value="model.multiTab">
-              <NRadio :value="true" :label="$t('common.yesOrNo.yes')" />
-              <NRadio :value="false" :label="$t('common.yesOrNo.no')" />
+              <NRadio :value="true" :label="$t('common.yesOrNo.yes')"/>
+              <NRadio :value="false" :label="$t('common.yesOrNo.no')"/>
             </NRadioGroup>
           </NFormItemGi>
           <NFormItemGi span="24 m:12" :label="$t('page.manage.menu.fixedIndexInTab')" path="fixedIndexInTab">
@@ -415,10 +437,10 @@ watch(
               <template #action="{ index, create, remove }">
                 <NSpace class="ml-12px">
                   <NButton size="medium" @click="() => create(index)">
-                    <icon-ic:round-plus class="text-icon" />
+                    <icon-ic:round-plus class="text-icon"/>
                   </NButton>
                   <NButton size="medium" @click="() => remove(index)">
-                    <icon-ic-round-remove class="text-icon" />
+                    <icon-ic-round-remove class="text-icon"/>
                   </NButton>
                 </NSpace>
               </template>
@@ -443,10 +465,10 @@ watch(
               <template #action="{ index, create, remove }">
                 <NSpace class="ml-12px">
                   <NButton size="medium" @click="() => create(index)">
-                    <icon-ic:round-plus class="text-icon" />
+                    <icon-ic:round-plus class="text-icon"/>
                   </NButton>
                   <NButton size="medium" @click="() => remove(index)">
-                    <icon-ic-round-remove class="text-icon" />
+                    <icon-ic-round-remove class="text-icon"/>
                   </NButton>
                 </NSpace>
               </template>

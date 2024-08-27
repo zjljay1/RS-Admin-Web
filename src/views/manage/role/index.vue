@@ -1,10 +1,11 @@
 <script setup lang="tsx">
-import { NButton, NPopconfirm, NTag } from 'naive-ui';
-import { fetchGetRoleList } from '@/service/api';
-import { useAppStore } from '@/store/modules/app';
-import { useTable, useTableOperate } from '@/hooks/common/table';
-import { $t } from '@/locales';
-import { enableStatusRecord } from '@/constants/business';
+import {NButton, NPopconfirm, NTag} from 'naive-ui';
+import {fetchGetRoleList} from '@/service/api';
+import {useAppStore} from '@/store/modules/app';
+import {useTable, useTableOperate} from '@/hooks/common/table';
+import {$t} from '@/locales';
+import {enableStatusRecord} from '@/constants/business';
+import {fetchRemoveRole,fetchBatchRemoveRole} from "@/service/api/system-manage";
 import RoleOperateDrawer from './modules/role-operate-drawer.vue';
 import RoleSearch from './modules/role-search.vue';
 
@@ -121,15 +122,19 @@ const {
 async function handleBatchDelete() {
   // request
   console.log(checkedRowKeys.value);
-
-  onBatchDeleted();
+  const { error } = await fetchBatchRemoveRole(checkedRowKeys.value);
+  if (!error) {
+    await onBatchDeleted();
+  }
 }
 
-function handleDelete(id: number) {
+async function handleDelete(id: number) {
   // request
   console.log(id);
-
-  onDeleted();
+  const { error } = await fetchRemoveRole(id);
+  if (!error) {
+    await onDeleted();
+  }
 }
 
 function edit(id: number) {
@@ -139,7 +144,7 @@ function edit(id: number) {
 
 <template>
   <div class="min-h-500px flex-col-stretch gap-16px overflow-hidden lt-sm:overflow-auto">
-    <RoleSearch v-model:model="searchParams" @reset="resetSearchParams" @search="getDataByPage" />
+    <RoleSearch v-model:model="searchParams" @reset="resetSearchParams" @search="getDataByPage"/>
     <NCard :title="$t('page.manage.role.title')" :bordered="false" size="small" class="sm:flex-1-hidden card-wrapper">
       <template #header-extra>
         <TableHeaderOperation
