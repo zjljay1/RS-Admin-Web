@@ -130,7 +130,9 @@ export default function useHookTable<A extends ApiFn, T, C>(config: TableConfig<
 
   /** reset search params */
   function resetSearchParams() {
-    Object.assign(searchParams, jsonClone(apiParams));
+    console.log('重置');
+    Object.assign(searchParams, apiParams);
+    console.log(searchParams, apiParams);
   }
 
   if (immediate) {

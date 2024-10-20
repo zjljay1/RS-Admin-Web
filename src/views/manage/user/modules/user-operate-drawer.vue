@@ -42,7 +42,7 @@ const title = computed(() => {
 
 type Model = Pick<
   Api.SystemManage.User,
-  'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status'
+  'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status' | 'roles'
 >;
 
 const model: Model = reactive(createDefaultModel());
@@ -55,7 +55,8 @@ function createDefaultModel(): Model {
     userPhone: '',
     userEmail: '',
     userRoles: [],
-    status: null
+    status: null,
+    roles: []
   };
 }
 
@@ -71,22 +72,13 @@ const roleOptions = ref<CommonType.Option<string>[]>([]);
 
 async function getRoleOptions() {
   const { error, data } = await fetchGetAllRoles();
-
   if (!error) {
     const options = data.map(item => ({
       label: item.roleName,
-      value: item.roleCode
+      value: String(item.id),
+      id: item.id
     }));
-
-    // the mock data does not have the roleCode, so fill it
-    // if the real request, remove the following code
-    const userRoleOptions = model.userRoles.map(item => ({
-      label: item,
-      value: item
-    }));
-    // end
-
-    roleOptions.value = [...userRoleOptions, ...options];
+    roleOptions.value = [...options];
   }
 }
 
@@ -95,6 +87,11 @@ function handleInitModel() {
 
   if (props.operateType === 'edit' && props.rowData) {
     Object.assign(model, props.rowData);
+    if (model.roles) {
+      model.userRoles = model.roles?.map(item => {
+        return String(item.id);
+      });
+    }
   }
 }
 
@@ -104,6 +101,7 @@ function closeDrawer() {
 
 async function handleSubmit() {
   await validate();
+  console.log('model:{}', model);
   let response;
   // request
   if (props.operateType === 'add') {

@@ -4,6 +4,7 @@ import { $t } from '@/locales';
 import { useFormRules, useNaiveForm } from '@/hooks/common/form';
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
 import { translateOptions } from '@/utils/common';
+import { ObjectToNull } from '@/utils/classType';
 
 defineOptions({
   name: 'UserSearch'
@@ -33,6 +34,7 @@ const rules = computed<Record<RuleKey, App.Global.FormRule>>(() => {
 
 async function reset() {
   await restoreValidation();
+  ObjectToNull(model.value, ['current', 'size']);
   emit('reset');
 }
 

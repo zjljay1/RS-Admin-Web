@@ -1,6 +1,7 @@
 <script setup lang="tsx">
 import { NButton, NPopconfirm, NTag } from 'naive-ui';
-import { fetchGetUserList } from '@/service/api';
+import { reactive } from 'vue';
+import { fetchBatchRemoveUser, fetchGetUserList } from '@/service/api';
 import { $t } from '@/locales';
 import { useAppStore } from '@/store/modules/app';
 import { enableStatusRecord, userGenderRecord } from '@/constants/business';
@@ -9,32 +10,21 @@ import UserOperateDrawer from './modules/user-operate-drawer.vue';
 import UserSearch from './modules/user-search.vue';
 
 const appStore = useAppStore();
+const searchParams = reactive<Api.SystemManage.UserSearchParams>({
+  current: 1,
+  size: 10,
+  status: null,
+  userName: null,
+  userGender: null,
+  nickName: null,
+  userPhone: null,
+  userEmail: null
+});
 
-const {
-  columns,
-  columnChecks,
-  data,
-  getData,
-  getDataByPage,
-  loading,
-  mobilePagination,
-  searchParams,
-  resetSearchParams
-} = useTable({
+const { columns, columnChecks, data, getData, getDataByPage, loading, mobilePagination, resetSearchParams } = useTable({
   apiFn: fetchGetUserList,
   showTotal: true,
-  apiParams: {
-    current: 1,
-    size: 10,
-    // if you want to use the searchParams in Form, you need to define the following properties, and the value is null
-    // the value can not be undefined, otherwise the property in Form will not be reactive
-    status: null,
-    userName: null,
-    userGender: null,
-    nickName: null,
-    userPhone: null,
-    userEmail: null
-  },
+  apiParams: searchParams,
   columns: () => [
     {
       type: 'selection',
@@ -151,15 +141,14 @@ const {
 
 async function handleBatchDelete() {
   // request
-  console.log(checkedRowKeys.value);
-
+  await fetchBatchRemoveUser(checkedRowKeys.value);
   onBatchDeleted();
 }
 
-function handleDelete(id: number) {
+async function handleDelete(id: number) {
   // request
-  console.log(id);
-
+  const ids = [String(id)];
+  await fetchBatchRemoveUser(ids);
   onDeleted();
 }
 

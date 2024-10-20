@@ -125,7 +125,8 @@ export function useTable<A extends NaiveUI.TableApiFn>(config: NaiveUI.NaiveTabl
 
       updateSearchParams({
         current: page,
-        size: pagination.pageSize!
+        size: pagination.pageSize!,
+        ...apiParams
       });
 
       getData();
@@ -136,7 +137,8 @@ export function useTable<A extends NaiveUI.TableApiFn>(config: NaiveUI.NaiveTabl
 
       updateSearchParams({
         current: pagination.page,
-        size: pageSize
+        size: pageSize,
+        ...apiParams
       });
 
       getData();
@@ -175,7 +177,8 @@ export function useTable<A extends NaiveUI.TableApiFn>(config: NaiveUI.NaiveTabl
 
     updateSearchParams({
       current: pageNum,
-      size: pagination.pageSize!
+      size: pagination.pageSize!,
+      ...apiParams
     });
 
     await getData();
@@ -229,6 +232,7 @@ export function useTableOperate<T extends TableData = TableData>(data: Ref<T[]>,
     operateType.value = 'edit';
     const findItem = data.value.find(item => item.id === id) || null;
     editingData.value = jsonClone(findItem);
+    console.log('修改数据：{}', editingData.value);
 
     openDrawer();
   }

@@ -133,6 +133,7 @@ declare namespace Api {
       userEmail: string;
       /** user role code collection */
       userRoles: string[];
+      roles?: Array<AllRole>;
     }>;
 
     /** user search params */
