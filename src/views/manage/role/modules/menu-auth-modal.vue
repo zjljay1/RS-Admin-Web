@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, shallowRef, watch } from 'vue';
 import { $t } from '@/locales';
-import { fetchGetAllPages, fetchGetMenuTree } from '@/service/api';
+import { fetchGetAllPages, fetchGetMenuTree, fetchGetRoleResourceList } from '@/service/api';
 
 defineOptions({
   name: 'MenuAuthModal'
@@ -62,14 +62,19 @@ async function getTree() {
 
   if (!error) {
     tree.value = data;
+    console.log(data);
   }
 }
 
 const checks = shallowRef<number[]>([]);
 
 async function getChecks() {
-  // request
-  checks.value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  const res = await fetchGetRoleResourceList(props.roleId);
+  if (res.error) {
+    window.$message?.error($t('common.error'));
+    return;
+  }
+  checks.value = res.data;
 }
 
 function handleSubmit() {
@@ -96,27 +101,27 @@ watch(visible, val => {
 </script>
 
 <template>
-  <NModal v-model:show="visible" :title="title" preset="card" class="w-480px">
+  <NModal v-model:show="visible" :title="title" class="w-480px" preset="card">
     <div class="flex-y-center gap-16px pb-12px">
       <div>{{ $t('page.manage.menu.home') }}</div>
-      <NSelect :value="home" :options="pageSelectOptions" size="small" class="w-160px" @update:value="updateHome" />
+      <NSelect :options="pageSelectOptions" :value="home" class="w-160px" size="small" @update:value="updateHome" />
     </div>
     <NTree
       v-model:checked-keys="checks"
       :data="tree"
-      key-field="id"
-      checkable
-      expand-on-click
-      virtual-scroll
       block-line
+      checkable
       class="h-280px"
+      expand-on-click
+      key-field="id"
+      virtual-scroll
     />
     <template #footer>
       <NSpace justify="end">
-        <NButton size="small" class="mt-16px" @click="closeModal">
+        <NButton class="mt-16px" size="small" @click="closeModal">
           {{ $t('common.cancel') }}
         </NButton>
-        <NButton type="primary" size="small" class="mt-16px" @click="handleSubmit">
+        <NButton class="mt-16px" size="small" type="primary" @click="handleSubmit">
           {{ $t('common.confirm') }}
         </NButton>
       </NSpace>

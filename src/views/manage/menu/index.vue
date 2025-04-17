@@ -40,7 +40,8 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
       render: row => {
         const tagMap: Record<Api.SystemManage.MenuType, NaiveUI.ThemeColor> = {
           1: 'default',
-          2: 'primary'
+          2: 'primary',
+          3: 'primary'
         };
 
         const label = $t(menuTypeRecord[row.menuType]);

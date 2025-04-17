@@ -158,3 +158,10 @@ export function fetchBatchRemoveUser(ids: string[]) {
     data: ids
   });
 }
+
+export function fetchGetRoleResourceList(roleID: number) {
+  return request<number[]>({
+    url: `/systemManage/getRuleResource/${roleID}`,
+    method: 'get'
+  });
+}

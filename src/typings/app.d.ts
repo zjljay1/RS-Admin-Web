@@ -634,6 +634,7 @@ declare namespace App {
             type: {
               directory: string;
               menu: string;
+              botton: string;
             };
             iconType: {
               iconify: string;

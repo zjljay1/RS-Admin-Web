@@ -151,7 +151,7 @@ declare namespace Api {
      * - "1": directory
      * - "2": menu
      */
-    type MenuType = '1' | '2';
+    type MenuType = '1' | '2' | '3';
 
     type MenuButton = {
       /**
