@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, shallowRef, watch } from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
 import { $t } from '@/locales';
 import { fetchGetAllPages, fetchGetMenuTree, fetchGetRoleResourceList } from '@/service/api';
 
@@ -17,6 +17,9 @@ const props = defineProps<Props>();
 const visible = defineModel<boolean>('visible', {
   default: false
 });
+const operateList = ref<(string | number)[]>([]);
+const isCascade = ref(false);
+const expandedKeys = ref<number[]>([]);
 
 function closeModal() {
   visible.value = false;
@@ -86,6 +89,48 @@ function handleSubmit() {
   closeModal();
 }
 
+function handleExpandCollapseChange(value: boolean) {
+  if (value) {
+    expandedKeys.value = getAllNodeIds(tree.value);
+  } else {
+    expandedKeys.value = [];
+  }
+}
+
+function handleCascadeChange(value: boolean) {
+  isCascade.value = value;
+}
+
+function handleSelectDeselectAllChange(value: boolean) {
+  if (value) {
+    checks.value = getAllKeys(tree.value);
+  } else {
+    checks.value = [];
+  }
+}
+
+function getAllKeys(data: any[]): number[] {
+  let keys: number[] = [];
+  data.forEach(item => {
+    keys.push(item.id);
+    if (item.children && item.children.length > 0) {
+      keys = keys.concat(getAllKeys(item.children));
+    }
+  });
+  return keys;
+}
+
+function getAllNodeIds(data: any[]): number[] {
+  let ids: number[] = [];
+  data.forEach(item => {
+    ids.push(item.id);
+    if (item.children && item.children.length > 0) {
+      ids = ids.concat(getAllNodeIds(item.children));
+    }
+  });
+  return ids;
+}
+
 function init() {
   getHome();
   getPages();
@@ -103,17 +148,36 @@ watch(visible, val => {
 <template>
   <NModal v-model:show="visible" :title="title" class="w-480px" preset="card">
     <div class="flex-y-center gap-16px pb-12px">
-      <div>{{ $t('page.manage.menu.home') }}</div>
-      <NSelect :options="pageSelectOptions" :value="home" class="w-160px" size="small" @update:value="updateHome" />
+      <div>
+        <NCheckbox v-model="operateList" value="0" @update:checked="handleExpandCollapseChange">
+          {{ $t('operate.Expand') }}/{{ $t('operate.Collapse') }}
+        </NCheckbox>
+        <NCheckbox v-model="operateList" value="1" @update:checked="handleCascadeChange">
+          {{ $t('operate.FatherSonLinkage') }}
+        </NCheckbox>
+        <NCheckbox v-model="operateList" value="2" @update:checked="handleSelectDeselectAllChange">
+          {{ $t('operate.SelectAll') }} / {{ $t('operate.DeselectAll') }}
+        </NCheckbox>
+      </div>
+      <NSelect
+        v-if="false"
+        :options="pageSelectOptions"
+        :value="home"
+        class="w-160px"
+        size="small"
+        @update:value="updateHome"
+      />
     </div>
     <NTree
       v-model:checked-keys="checks"
+      v-model:expanded-keys="expandedKeys"
       :data="tree"
       block-line
       checkable
       class="h-280px"
       expand-on-click
       key-field="id"
+      :cascade="isCascade"
       virtual-scroll
     />
     <template #footer>

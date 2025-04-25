@@ -505,6 +505,13 @@ const local: App.I18n.Schema = {
   },
   datatable: {
     itemCount: 'Total {total} items'
+  },
+  operate: {
+    Expand: 'Expand',
+    Collapse: 'Collapse',
+    FatherSonLinkage: 'Father Son Linkage',
+    SelectAll: 'Select All',
+    DeselectAll: 'Deselect All'
   }
 };
 

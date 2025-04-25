@@ -668,6 +668,7 @@ declare namespace App {
       datatable: {
         itemCount: string;
       };
+      operate: Record<any, string>;
     };
 
     type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string

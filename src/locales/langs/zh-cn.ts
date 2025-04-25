@@ -505,6 +505,13 @@ const local: App.I18n.Schema = {
   },
   datatable: {
     itemCount: '共 {total} 条'
+  },
+  operate: {
+    Expand: '展开',
+    Collapse: '折叠',
+    FatherSonLinkage: '父子联动',
+    SelectAll: '全选',
+    DeselectAll: '全不选'
   }
 };
 
