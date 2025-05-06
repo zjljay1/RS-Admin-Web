@@ -290,6 +290,7 @@ declare namespace App {
       common: {
         action: string;
         add: string;
+        permissions: string;
         addSuccess: string;
         backToHome: string;
         batchDelete: string;

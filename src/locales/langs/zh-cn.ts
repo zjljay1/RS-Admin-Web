@@ -9,6 +9,7 @@ const local: App.I18n.Schema = {
   common: {
     action: '操作',
     add: '新增',
+    permissions: '权限',
     addSuccess: '添加成功',
     backToHome: '返回首页',
     batchDelete: '批量删除',

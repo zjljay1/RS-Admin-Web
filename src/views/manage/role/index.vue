@@ -1,11 +1,14 @@
 <script setup lang="tsx">
 import { NButton, NPopconfirm, NTag } from 'naive-ui';
+import { ref } from 'vue';
 import { fetchGetRoleList } from '@/service/api';
 import { useAppStore } from '@/store/modules/app';
 import { useTable, useTableOperate } from '@/hooks/common/table';
 import { $t } from '@/locales';
 import { enableStatusRecord } from '@/constants/business';
 import { fetchBatchRemoveRole, fetchRemoveRole } from '@/service/api/system-manage';
+import { useBoolean } from '~/packages/hooks';
+import MenuAuthModal from '@/views/manage/role/modules/menu-auth-modal.vue';
 import RoleOperateDrawer from './modules/role-operate-drawer.vue';
 import RoleSearch from './modules/role-search.vue';
 
@@ -85,11 +88,14 @@ const {
       key: 'operate',
       title: $t('common.operate'),
       align: 'center',
-      width: 130,
+      width: 200,
       render: row => (
         <div class="flex-center gap-8px">
           <NButton type="primary" ghost size="small" onClick={() => edit(row.id)}>
             {$t('common.edit')}
+          </NButton>
+          <NButton type="primary" ghost size="small" onClick={() => handlePermissions(row.id)}>
+            {$t('common.permissions')}
           </NButton>
           <NPopconfirm onPositiveClick={() => handleDelete(row.id)}>
             {{
@@ -118,6 +124,8 @@ const {
   onDeleted
   // closeDrawer
 } = useTableOperate(data, getData);
+const { bool: menuAuthVisible, setTrue: openMenuAuthModal } = useBoolean();
+const roleId = ref<number>(1);
 
 async function handleBatchDelete() {
   // request
@@ -130,7 +138,6 @@ async function handleBatchDelete() {
 
 async function handleDelete(id: number) {
   // request
-  console.log(id);
   const { error } = await fetchRemoveRole(id);
   if (!error) {
     await onDeleted();
@@ -139,6 +146,10 @@ async function handleDelete(id: number) {
 
 function edit(id: number) {
   handleEdit(id);
+}
+function handlePermissions(id: number) {
+  roleId.value = id;
+  openMenuAuthModal();
 }
 </script>
 
@@ -176,6 +187,7 @@ function edit(id: number) {
         @submitted="getDataByPage"
       />
     </NCard>
+    <MenuAuthModal v-model:visible="menuAuthVisible" :role-id="roleId" />
   </div>
 </template>
 
